@@ -3,7 +3,7 @@ import { getAllProblems, createOrUpdateProblem, getCurrentProblemInfoFromLeetCod
 import { Problem } from "../entity/problem";
 import { calculateNextReview, updateProblemWithFSRS } from "../service/fsrsService";
 import { getDayStartHour } from "../service/configService";
-import { isSameLogicalDay, logicalDayDiff } from "../util/dayBoundary";
+import { getLogicalDayStart, isSameLogicalDay, logicalDayDiff } from "../util/dayBoundary";
 
 
 
@@ -337,10 +337,9 @@ export async function handleFeedbackSubmission(problem = null, fromPopup = false
         // 只有在页面提交时才显示成功提示
         if (isPageSubmission) {
             // 计算下次复习时间与今天的天数差
-            const nextReviewDate = new Date(problem.fsrsState.nextReview);
-            const today = new Date();
-            const diffTime = nextReviewDate.getTime() - today.getTime();
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            // 按逻辑日计算，和评分弹窗的预览、复习列表保持一致
+            const nextReviewDate = new Date(getLogicalDayStart(problem.fsrsState.nextReview, dayStartHour));
+            const diffDays = logicalDayDiff(Date.now(), problem.fsrsState.nextReview, dayStartHour);
 
             // 显示复习成功提示，包含下次复习时间
             showToast(`复习成功！下次复习时间：${nextReviewDate.toLocaleDateString()}（${diffDays}天后）\nReview successful! Next review: ${nextReviewDate.toLocaleDateString()} (in ${diffDays} days)`, "success");

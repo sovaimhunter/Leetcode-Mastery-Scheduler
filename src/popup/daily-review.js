@@ -1297,15 +1297,6 @@ async function initializeOptions() {
             await setCloudSyncEnabled(isCloudSyncEnabled);
             await setReminderEnabled(isReminderEnabled);
 
-            if (dayStartHourSelect) {
-                await setDayStartHour(Number(dayStartHourSelect.value));
-                await loadDayStartHour();
-                // 刷新时间变化会影响「今天」的判定，重新加载复习列表
-                await loadDailyReviewData();
-                setCurrentDate();
-                updateCardDisplay();
-            }
-
             // 保存提醒详细设置（包括提醒开关状态）
             const selectedDays = [];
             for (let i = 0; i <= 6; i++) {
@@ -1327,6 +1318,16 @@ async function initializeOptions() {
                 reminderEndTime: reminderEndTime?.value || '22:00',
                 reminderDays: selectedDays
             });
+
+            // 放在其他设置保存之后，避免刷新列表出错时影响其他设置的保存
+            if (dayStartHourSelect) {
+                await setDayStartHour(Number(dayStartHourSelect.value));
+                await loadDayStartHour();
+                // 刷新时间变化会影响「今天」的判定，重新加载复习列表
+                await loadDailyReviewData();
+                setCurrentDate();
+                updateCardDisplay();
+            }
 
             console.log('Settings saved successfully');
 
